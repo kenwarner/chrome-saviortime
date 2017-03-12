@@ -1,0 +1,24 @@
+{
+    "name": "SaviorTime extension",
+    "version": "0.1",
+    "description": "Use RescueTime API to keep you focused and save your time",
+    "icons": {
+        "128": "rescuetime.png"
+    },
+    "permissions": [
+        "notifications",
+        "alarms",
+        "storage",
+        "*://*.rescuetime.com/"
+    ],
+    "options_page": "options.html",
+    "browser_action": {
+        "default_title": "Savior Time",
+        "default_icon": "rescuetime.png"
+    },
+    "background": {
+        "scripts": ["background.js"],
+        "persistent": false
+    },
+    "manifest_version": 2
+}

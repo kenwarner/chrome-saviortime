@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>SaviorTime Options</title>
+    <style>
+        * {
+            font-size: 14pt;
+        }
+        
+        div {
+            margin: 10px;
+        }
+
+        input {
+            height: 20px;
+            padding: 3px;
+        }
+
+        button {
+            padding: 8px 16px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div>SaviorTime uses the RescueTime API to show you the most up to date information.</div>
+    <div>Generate a RescueTime API key for your account here:</div>
+    <div><a href="https://www.rescuetime.com/anapi/manage" target=_blank>https://www.rescuetime.com/anapi/manage</a></div>
+
+    <div><label>Your API Key:</label> <input type="text" id="apikey" size="50"></div>
+    <div><button id="save">Save</button></div>
+    <div id="status"></div>
+
+    <script src="options.js"></script>
+</body>
+
+</html>
