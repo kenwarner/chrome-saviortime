@@ -102,7 +102,9 @@ var SaviorTime = {
     },
 
     generateProductivityGraph: function () {
-        var barSize = 13;
+        var barSize = 18;
+        var barGap = 1;
+        var maxMessageSize = 18;
         var log = SaviorTime.getMostRecentLog();
 
         if (log == null) {
@@ -110,12 +112,24 @@ var SaviorTime = {
         }
 
         var items = log.items.map(function (item) {
+            // pad percents < 10 with 2 spaces to create vertical alignment
+            var title = ("|||" + item.percentMessage).slice(-3).replace(/^[|]/, "  ");
+            var graph = "▆".repeat(item.percent / log.maxPercent * barSize);
+            var timeSpent = (item.timeSpent.replace(/\|/g, " "));
+            var timeDelta = (item.secondsDelta >= 60 ? " +" + Math.round(item.secondsDelta / 60.0 * 10) / 10 + "m" : "");
+            var timeMessage = timeSpent + timeDelta;
+            var message = graph + " " + timeMessage;
+
+            // if the time overflows the graph, inline it into the graph
+            if (message.length > maxMessageSize) {
+                var g1 = graph.substr(0, graph.length - timeMessage.length - barGap);
+                var g2 = graph.substr(g1.length + timeMessage.length - 1, barGap);
+                message = g1 + timeMessage + g2;
+            }
+
             return {
-                // pad percents < 10 with 2 spaces to create vertical alignment
-                title: ("|||" + item.percentMessage).slice(-3).replace(/^[|]/, "  "),
-                message: "▆".repeat(item.percent / log.maxPercent * barSize) +
-                    " " + (item.timeSpent.replace(/\|/g, " ")) +
-                    (item.secondsDelta >= 60 ? " +" + Math.round(item.secondsDelta / 60.0 * 10) / 10 + "m" : "")
+                title: title,
+                message: message
             }
         });
 
