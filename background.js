@@ -102,9 +102,9 @@ var SaviorTime = {
     },
 
     generateProductivityGraph: function () {
-        var barSize = 18;
-        var barGap = 1;
-        var maxMessageSize = 18;
+        var barSize = 20;
+        var barGap = 2;
+        var maxMessageSize = 20;
         var log = SaviorTime.getMostRecentLog();
 
         if (log == null) {
@@ -116,15 +116,15 @@ var SaviorTime = {
             var title = ("|||" + item.percentMessage).slice(-3).replace(/^[|]/, "  ");
             var graph = "▆".repeat(item.percent / log.maxPercent * barSize);
             var timeSpent = (item.timeSpent.replace(/\|/g, " "));
-            var timeDelta = (item.secondsDelta >= 60 ? " +" + Math.round(item.secondsDelta / 60.0 * 10) / 10 + "m" : "");
+            var timeDelta = item.secondsDelta >= 60 ? " +" + Math.round(item.secondsDelta / 60.0) + "m" : "";
             var timeMessage = timeSpent + timeDelta;
             var message = graph + " " + timeMessage;
 
             // if the time overflows the graph, inline it into the graph
             if (message.length > maxMessageSize) {
-                var g1 = graph.substr(0, graph.length - timeMessage.length - barGap);
-                var g2 = graph.substr(g1.length + timeMessage.length - 1, barGap);
-                message = g1 + timeMessage + g2;
+                var g1 = graph.substr(0, graph.length - timeMessage.length - barGap - 1);
+                var g2 = graph.substr(g1.length + timeMessage.length - 2, barGap);
+                message = g1 + " " + timeMessage + " " + g2;
             }
 
             return {
@@ -155,7 +155,8 @@ var SaviorTime = {
             ]
         };
 
-        opts.title = opts.message = "Productivity Pulse: " + SaviorTime.calculateProductivityScore() + "\r" + log.timeSpent + " as of " + Math.round((Date.now() - log.timestamp) / 60/1000) + "m ago";
+        var asof = Math.round((Date.now() - log.timestamp) / 60/1000);
+        opts.title = opts.message = "Productivity Pulse: " + SaviorTime.calculateProductivityScore() + "\r" + log.timeSpent + " as of " + asof + "m ago";
         opts.items = SaviorTime.generateProductivityGraph();
 
         chrome.notifications.create(opts);
