@@ -73,8 +73,8 @@ var SaviorTime = {
         return '#' + r + g + b;
     },
 
-    getMostRecentLog: function () {
-        return SaviorTime.responseLogs[SaviorTime.responseLogs.length - 1];
+    getMostRecentLog: function (offset = 0) {
+        return SaviorTime.responseLogs[SaviorTime.responseLogs.length - offset - 1];
     },
 
     calculateTimeSpent: function (seconds) {
@@ -115,7 +115,7 @@ var SaviorTime = {
                 title: ("|||" + item.percentMessage).slice(-3).replace(/^[|]/, "  "),
                 message: "▆".repeat(item.percent / log.maxPercent * barSize) +
                     " " + (item.timeSpent.replace(/\|/g, " ")) +
-                    (item.secondsDelta > 0 ? " +" + Math.round(item.secondsDelta / 60.0 * 10) / 10 + "m" : "")
+                    (item.secondsDelta >= 60 ? " +" + Math.round(item.secondsDelta / 60.0 * 10) / 10 + "m" : "")
             }
         });
 
@@ -141,7 +141,7 @@ var SaviorTime = {
             ]
         };
 
-        opts.title = opts.message = "Productivity Pulse: " + SaviorTime.calculateProductivityScore() + "\rTime Spent: " + log.timeSpent;
+        opts.title = opts.message = "Productivity Pulse: " + SaviorTime.calculateProductivityScore() + "\r" + log.timeSpent + " as of " + Math.round((new Date() - log.timestamp) / 60/1000) + "m ago";
         opts.items = SaviorTime.generateProductivityGraph();
 
         chrome.notifications.create(opts);
@@ -216,9 +216,15 @@ var SaviorTime = {
                         return (a.percent > b.percent) ? a : b;
                     }, 0).percent;
 
-                    SaviorTime.responseLogs.push(currentLog);
+                    // only save this response if it's the first one, or it is different from the most recent one
+                    var mostRecentLog = SaviorTime.getMostRecentLog();
+                    var hasNewData = (mostRecentLog == null || currentLog.totalSeconds > mostRecentLog.totalSeconds);
+                    if (hasNewData) {
+                        SaviorTime.responseLogs.push(currentLog);
+                    }
+
                     SaviorTime.responseLogs = SaviorTime.responseLogs.slice(-10); // keep only the last 10
-                    resolve();
+                    resolve(hasNewData);
                 }
             });
 
@@ -232,17 +238,19 @@ var SaviorTime = {
         return promise;
     },
 
-    update: function () {
-        SaviorTime.updateData().then(function () {
-            SaviorTime.showNotification();
-            SaviorTime.setIcon(SaviorTime.calculateProductivityScore());
+    update: function (forceShowNotification = false) {
+        SaviorTime.updateData().then(function (hasNewData) {
+            if (forceShowNotification || hasNewData) {
+                SaviorTime.showNotification();
+                SaviorTime.setIcon(SaviorTime.calculateProductivityScore());
+            }
         });
     }
 
 };
 
 chrome.browserAction.onClicked.addListener(function () {
-    SaviorTime.update();
+    SaviorTime.update(true);
 });
 
 chrome.notifications.onClicked.addListener(function (notificationId) {
@@ -261,11 +269,11 @@ chrome.notifications.onButtonClicked.addListener(function (notificationId, butto
 });
 
 chrome.runtime.onInstalled.addListener(function () {
-    chrome.alarms.onAlarm.addListener(SaviorTime.update);
+    chrome.alarms.onAlarm.addListener(function(alarm) { SaviorTime.update(); });
     chrome.alarms.create('refresh', {
         periodInMinutes: 3
     });
 });
 
 // start with one update
-SaviorTime.update();
+SaviorTime.update(true);
