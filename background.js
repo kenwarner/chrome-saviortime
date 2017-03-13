@@ -214,7 +214,7 @@ var SaviorTime = {
                     // calculate max percent
                     currentLog.maxPercent = currentLog.items.reduce(function (a, b) {
                         return (a.percent > b.percent) ? a : b;
-                    }).percent;
+                    }, 0).percent;
 
                     SaviorTime.responseLogs.push(currentLog);
                     SaviorTime.responseLogs = SaviorTime.responseLogs.slice(-10); // keep only the last 10
