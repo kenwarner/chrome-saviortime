@@ -155,7 +155,7 @@ var SaviorTime = {
             ]
         };
 
-        opts.title = opts.message = "Productivity Pulse: " + SaviorTime.calculateProductivityScore() + "\r" + log.timeSpent + " as of " + Math.round((new Date() - log.timestamp) / 60/1000) + "m ago";
+        opts.title = opts.message = "Productivity Pulse: " + SaviorTime.calculateProductivityScore() + "\r" + log.timeSpent + " as of " + Math.round((Date.now() - log.timestamp) / 60/1000) + "m ago";
         opts.items = SaviorTime.generateProductivityGraph();
 
         chrome.notifications.create(opts);
@@ -175,7 +175,7 @@ var SaviorTime = {
                     var response = JSON.parse(this.responseText);
 
                     var currentLog = {
-                        timestamp: new Date(),
+                        timestamp: Date.now(),
                         items: []
                     };
 
@@ -238,6 +238,7 @@ var SaviorTime = {
                     }
 
                     SaviorTime.responseLogs = SaviorTime.responseLogs.slice(-10); // keep only the last 10
+                    chrome.storage.sync.set({ responseLogs: SaviorTime.responseLogs });
                     resolve(hasNewData);
                 }
             });
@@ -263,6 +264,13 @@ var SaviorTime = {
 
 };
 
+chrome.runtime.onInstalled.addListener(function () {
+    chrome.alarms.onAlarm.addListener(function(alarm) { SaviorTime.update(); });
+    chrome.alarms.create('refresh', {
+        periodInMinutes: 3
+    });
+});
+
 chrome.browserAction.onClicked.addListener(function () {
     SaviorTime.update(true);
 });
@@ -282,12 +290,9 @@ chrome.notifications.onButtonClicked.addListener(function (notificationId, butto
     }
 });
 
-chrome.runtime.onInstalled.addListener(function () {
-    chrome.alarms.onAlarm.addListener(function(alarm) { SaviorTime.update(); });
-    chrome.alarms.create('refresh', {
-        periodInMinutes: 3
-    });
-});
+chrome.storage.sync.get('responseLogs', function(items) { 
+    SaviorTime.responseLogs = items.responseLogs || [];
 
-// start with one update
-SaviorTime.update(true);
+    // start with one update
+    SaviorTime.update(true);
+});
