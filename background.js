@@ -102,9 +102,9 @@ var SaviorTime = {
     },
 
     generateProductivityGraph: function (offset = 0) {
-        var barSize = 20;
+        var barSize = 18;
         var barGap = 1;
-        var maxMessageSize = 20;
+        var maxMessageSize = 18;
         var log = SaviorTime.getMostRecentLog(offset);
 
         if (log == null) {
