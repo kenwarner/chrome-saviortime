@@ -233,7 +233,9 @@ var SaviorTime = {
 
                     // only save this response if it's the first one, or it is different from the most recent one
                     var mostRecentLog = SaviorTime.getMostRecentLog();
-                    var hasNewData = (mostRecentLog == null || currentLog.totalSeconds > mostRecentLog.totalSeconds);
+                    var hasNewData = (mostRecentLog == null || 
+                        new Date(currentLog.timestamp).getDay() != new Date(mostRecentLog.timestamp).getDay() || 
+                        currentLog.totalSeconds > mostRecentLog.totalSeconds);
                     if (hasNewData) {
                         SaviorTime.responseLogs.push(currentLog);
                     }
