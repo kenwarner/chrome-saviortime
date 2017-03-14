@@ -103,7 +103,7 @@ var SaviorTime = {
 
     generateProductivityGraph: function (offset = 0) {
         var barSize = 20;
-        var barGap = 2;
+        var barGap = 1;
         var maxMessageSize = 20;
         var log = SaviorTime.getMostRecentLog(offset);
 
@@ -124,7 +124,7 @@ var SaviorTime = {
             if (message.length > maxMessageSize) {
                 var g1 = graph.substr(0, graph.length - timeMessage.length - barGap - 1);
                 var g2 = graph.substr(g1.length + timeMessage.length - 2, barGap);
-                message = g1 + " " + timeMessage + " " + g2;
+                message = g2 + " " + timeMessage + " " + g1;
             }
 
             return {
