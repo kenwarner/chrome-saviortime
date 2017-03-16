@@ -159,6 +159,11 @@ var SaviorTime = {
         opts.title = opts.message = "Productivity Pulse: " + SaviorTime.calculateProductivityScore(offset) + "\r" + log.timeSpent + " as of " + asof + "m ago";
         opts.items = SaviorTime.generateProductivityGraph(offset);
 
+        // notifications.create will fail if items is empty
+        if (opts.items.length <= 0) {
+            return;
+        }
+
         chrome.notifications.create(opts);
     },
 
@@ -193,12 +198,12 @@ var SaviorTime = {
                             var firstResponse = SaviorTime.getMostRecentLog();
 
                             if (firstResponse !== null) {
-                                var firstResponseSeconds = firstResponse.items.find(function (item) {
+                                var categoryItem = firstResponse.items.find(function (item) {
                                     return item.title == timeCategory
-                                }).seconds;
+                                });
 
-                                if (seconds > firstResponseSeconds) {
-                                    secondsDelta = seconds - firstResponseSeconds;
+                                if (categoryItem !== null && seconds > categoryItem.seconds) {
+                                    secondsDelta = seconds - categoryItem.seconds;
                                 }
                             }
                         }
@@ -274,7 +279,9 @@ var SaviorTime = {
 };
 
 chrome.runtime.onInstalled.addListener(function () {
-    chrome.alarms.onAlarm.addListener(function(alarm) { SaviorTime.update(); });
+    chrome.alarms.onAlarm.addListener(function(alarm) { 
+        SaviorTime.update(); 
+    });
     chrome.alarms.create('refresh', {
         periodInMinutes: 3
     });
